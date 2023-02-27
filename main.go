@@ -28,6 +28,7 @@ func main() {
 
 	http.HandleFunc("/", Inicio)
 	http.HandleFunc("/crear", Crear)
+	http.HandleFunc("/insertar", Insertar)
 
 	log.Println("Servidor corriendo...")
 
@@ -35,12 +36,12 @@ func main() {
 }
 func Inicio(w http.ResponseWriter, r *http.Request) {
 
-	conexionEstablecida := conexionBD()
-	insertarRegistros, err := conexionEstablecida.Prepare("INSERT INTO empleados(nombre,correo) VALUES('Pequeño Cesar', 'littlecesar@gmial.com')")
-	if err != nil {
-		panic(err.Error())
-	}
-	insertarRegistros.Exec()
+	//conexionEstablecida := conexionBD()
+	//insertarRegistros, err := conexionEstablecida.Prepare("INSERT INTO empleados(nombre,correo) VALUES('Pequeño Cesar', 'littlecesar@gmial.com')")
+	//if err != nil {
+	//	panic(err.Error())
+	//}
+	//insertarRegistros.Exec()
 
 	//fmt.Fprintf(w, "Hola Develoteca")
 	plantillas.ExecuteTemplate(w, "inicio", nil)
@@ -48,4 +49,19 @@ func Inicio(w http.ResponseWriter, r *http.Request) {
 }
 func Crear(w http.ResponseWriter, r *http.Request) {
 	plantillas.ExecuteTemplate(w, "crear", nil)
+}
+func Insertar(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		nombre := r.FormValue("nombre")
+		correo := r.FormValue("correo")
+
+		conexionEstablecida := conexionBD()
+		insertarRegistros, err := conexionEstablecida.Prepare("INSERT INTO empleados(nombre,correo) VALUES(?,?)")
+		if err != nil {
+			panic(err.Error())
+		}
+		insertarRegistros.Exec(nombre, correo)
+
+		http.Redirect(w, r, "/", 301)
+	}
 }
