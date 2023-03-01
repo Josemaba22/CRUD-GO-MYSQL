@@ -128,4 +128,5 @@ func Editar(w http.ResponseWriter, r *http.Request) {
 		empleado.Correo = correo
 	}
 	fmt.Println(empleado)
+	plantillas.ExecuteTemplate(w, "editar", empleado)
 }
