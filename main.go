@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"text/template"
@@ -34,14 +35,37 @@ func main() {
 
 	http.ListenAndServe(":8080", nil)
 }
+
+type Empleado struct {
+	Id     int
+	Nombre string
+	Correo string
+}
+
 func Inicio(w http.ResponseWriter, r *http.Request) {
 
-	//conexionEstablecida := conexionBD()
-	//insertarRegistros, err := conexionEstablecida.Prepare("INSERT INTO empleados(nombre,correo) VALUES('Pequeño Cesar', 'littlecesar@gmial.com')")
-	//if err != nil {
-	//	panic(err.Error())
-	//}
-	//insertarRegistros.Exec()
+	conexionEstablecida := conexionBD()
+	registros, err := conexionEstablecida.Query("SELECT * FROM empleados")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	empleado := Empleado{}
+	arregloEmpleados := []Empleado{}
+
+	for registros.Next() {
+		var id int
+		var nombre, correo string
+		err = registros.Scan(&id, &nombre, &correo)
+		if err != nil {
+			panic(err.Error())
+		}
+		empleado.Id = id
+		empleado.Nombre = nombre
+		empleado.Correo = correo
+		arregloEmpleados = append(arregloEmpleados, empleado)
+	}
+	fmt.Println(arregloEmpleados)
 
 	//fmt.Fprintf(w, "Hola Develoteca")
 	plantillas.ExecuteTemplate(w, "inicio", nil)
