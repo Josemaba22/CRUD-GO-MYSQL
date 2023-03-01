@@ -68,7 +68,7 @@ func Inicio(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(arregloEmpleados)
 
 	//fmt.Fprintf(w, "Hola Develoteca")
-	plantillas.ExecuteTemplate(w, "inicio", nil)
+	plantillas.ExecuteTemplate(w, "inicio", arregloEmpleados)
 
 }
 func Crear(w http.ResponseWriter, r *http.Request) {
@@ -86,6 +86,6 @@ func Insertar(w http.ResponseWriter, r *http.Request) {
 		}
 		insertarRegistros.Exec(nombre, correo)
 
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/", http.StatusMovedPermanently)
 	}
 }

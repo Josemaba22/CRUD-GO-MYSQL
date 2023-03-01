@@ -13,12 +13,15 @@
             </tr>
         </thead>
         <tbody>
+
+            {{  range. }}
             <tr>
-                <td>01</td>
-                <td>José</td>
-                <td>josemaba_22@hotmail.com</td>
+                <td>{{.Id}}</td>
+                <td>{{.Nombre}}</td>
+                <td>{{.Correo}}</td>
                 <td>Editar | Borrar</td>
             </tr>
+            {{ end }}
         </tbody>
     </table>
 
