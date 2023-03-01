@@ -30,6 +30,8 @@ func main() {
 	http.HandleFunc("/", Inicio)
 	http.HandleFunc("/crear", Crear)
 	http.HandleFunc("/insertar", Insertar)
+	http.HandleFunc("/borrar", Borrar)
+	http.HandleFunc("/editar", Editar)
 
 	log.Println("Servidor corriendo...")
 
@@ -65,9 +67,10 @@ func Inicio(w http.ResponseWriter, r *http.Request) {
 		empleado.Correo = correo
 		arregloEmpleados = append(arregloEmpleados, empleado)
 	}
-	fmt.Println(arregloEmpleados)
 
+	//fmt.Println(arregloEmpleados)
 	//fmt.Fprintf(w, "Hola Develoteca")
+
 	plantillas.ExecuteTemplate(w, "inicio", arregloEmpleados)
 
 }
@@ -88,4 +91,41 @@ func Insertar(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, "/", http.StatusMovedPermanently)
 	}
+}
+func Borrar(w http.ResponseWriter, r *http.Request) {
+	idEmpleado := r.URL.Query().Get("id")
+	fmt.Println(idEmpleado)
+
+	conexionEstablecida := conexionBD()
+	borrarRegistros, err := conexionEstablecida.Prepare("DELETE FROM empleados WHERE id=?")
+	if err != nil {
+		panic(err.Error())
+	}
+	borrarRegistros.Exec(idEmpleado)
+
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+}
+func Editar(w http.ResponseWriter, r *http.Request) {
+	idEmpleado := r.URL.Query().Get("id")
+	fmt.Println(idEmpleado)
+
+	conexionEstablecida := conexionBD()
+	registro, err := conexionEstablecida.Query("SELECT * FROM empleados WHERE id=?", idEmpleado)
+	if err != nil {
+		panic(err.Error())
+	}
+	empleado := Empleado{}
+
+	for registro.Next() {
+		var id int
+		var nombre, correo string
+		err = registro.Scan(&id, &nombre, &correo)
+		if err != nil {
+			panic(err.Error())
+		}
+		empleado.Id = id
+		empleado.Nombre = nombre
+		empleado.Correo = correo
+	}
+	fmt.Println(empleado)
 }
