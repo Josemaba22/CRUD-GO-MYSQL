@@ -32,6 +32,7 @@ func main() {
 	http.HandleFunc("/insertar", Insertar)
 	http.HandleFunc("/borrar", Borrar)
 	http.HandleFunc("/editar", Editar)
+	http.HandleFunc("/actualizar", Actualizar)
 
 	log.Println("Servidor corriendo...")
 
@@ -74,9 +75,11 @@ func Inicio(w http.ResponseWriter, r *http.Request) {
 	plantillas.ExecuteTemplate(w, "inicio", arregloEmpleados)
 
 }
+
 func Crear(w http.ResponseWriter, r *http.Request) {
 	plantillas.ExecuteTemplate(w, "crear", nil)
 }
+
 func Insertar(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		nombre := r.FormValue("nombre")
@@ -92,6 +95,7 @@ func Insertar(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusMovedPermanently)
 	}
 }
+
 func Borrar(w http.ResponseWriter, r *http.Request) {
 	idEmpleado := r.URL.Query().Get("id")
 	fmt.Println(idEmpleado)
@@ -105,12 +109,13 @@ func Borrar(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
+
 func Editar(w http.ResponseWriter, r *http.Request) {
 	idEmpleado := r.URL.Query().Get("id")
 	fmt.Println(idEmpleado)
 
 	conexionEstablecida := conexionBD()
-	registro, err := conexionEstablecida.Query("SELECT * FROM empleados WHERE id=?", idEmpleado)
+	registro, err := conexionEstablecida.Query("SELECT * FROM empleados WHERE id=? ", idEmpleado)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -129,4 +134,22 @@ func Editar(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(empleado)
 	plantillas.ExecuteTemplate(w, "editar", empleado)
+}
+
+func Actualizar(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		id := r.FormValue("id")
+		nombre := r.FormValue("nombre")
+		correo := r.FormValue("correo")
+
+		fmt.Println("Hola")
+		conexionEstablecida := conexionBD()
+		modificarRegistros, err := conexionEstablecida.Prepare("UPDATE empleados SET nombre=?,correo=? WHERE id=?")
+		if err != nil {
+			panic(err.Error())
+		}
+		modificarRegistros.Exec(nombre, correo, id)
+		fmt.Println("Que show")
+		http.Redirect(w, r, "/", http.StatusMovedPermanently)
+	}
 }
